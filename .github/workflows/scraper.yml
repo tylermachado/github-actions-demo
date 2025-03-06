@@ -2,20 +2,29 @@ name: First Scraper
 
 on:
   workflow_dispatch:
+    inputs:
+      state:
+        description: 'U.S. state to scrape'
+        required: true
+        default: 'ia'
   schedule:
   - cron: "0 0 * * *"
 
 permissions:
   contents: write
 
+
 jobs:
   scrape:
     name: Scrape
     runs-on: ubuntu-latest
     steps:
+      - name: Hello world
+        run: echo "Scraping data for ${{ inputs.state }}"
+
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -25,7 +34,10 @@ jobs:
         run: pip install warn-scraper
 
       - name: Scrape
-        run: warn-scraper IA --data-dir ./data/
+        run: warn-scraper ${{ inputs.state }} --data-dir ./data/
+
+      - name: Save datestamp
+        run: date > ./data/latest-scrape.txt
         
       - name: Commit and push
         run: |
